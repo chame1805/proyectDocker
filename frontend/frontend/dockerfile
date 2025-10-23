@@ -1,0 +1,23 @@
+# ===== Build =====
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# ===== Runtime =====
+FROM node:20-slim
+WORKDIR /app
+COPY package.json package-lock.json* ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+COPY server.js ./server.js
+
+ENV NODE_ENV=production
+ENV FRONT_PORT=3000
+ENV BACKEND_URL=http://localhost:8000
+
+EXPOSE 3000
+CMD ["node", "server.js"]

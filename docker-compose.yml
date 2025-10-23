@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  chame-mysql:
+    container_name: chame-mysql
+    image: mysql:8.0
+    command:
+      [
+        "--mysql-native-password=ON",
+        "--character-set-server=utf8mb4",
+        "--collation-server=utf8mb4_0900_ai_ci"
+      ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT}:3306"
+    volumes:
+      - chame_mysql_data:/var/lib/mysql
+      # Si quieres crear tablas/seed al primer arranque, descomenta la línea de abajo
+      # y agrega un archivo ./db/init.sql
+      # - ./db/init.sql:/docker-entrypoint-initdb.d/01_init.sql:ro
+    networks:
+      - chame_net
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -u$$MYSQL_USER -p$$MYSQL_PASSWORD -h 127.0.0.1 --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  chame-backend:
+    container_name: chame-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      - API_PORT=${API_PORT}
+      - FULL_NAME=${FULL_NAME}
+      - DB_HOST=chame-mysql
+      - DB_PORT=3306
+      - DB_USER=${MYSQL_USER}
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_NAME=${MYSQL_DATABASE}
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    depends_on:
+      chame-mysql:
+        condition: service_healthy
+    networks:
+      - chame_net
+    restart: unless-stopped
+
+  chame-frontend:
+    container_name: chame-frontend
+    build:
+      context: ./frontend/frontend  # ← si tu carpeta real es ./frontend/frontend cámbialo aquí
+      dockerfile: Dockerfile
+    environment:
+      - FRONT_PORT=${FRONT_PORT}
+      - BACKEND_URL=http://chame-backend:${API_PORT}
+    ports:
+      - "${FRONT_PORT}:${FRONT_PORT}"
+    depends_on:
+      - chame-backend
+    networks:
+      - chame_net
+    restart: unless-stopped
+
+networks:
+  chame_net:
+
+volumes:
+  chame_mysql_data:

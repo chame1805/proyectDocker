@@ -1,0 +1,66 @@
+# =========================================
+# 🔹 Logs y archivos temporales
+# =========================================
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================================
+# 🔹 Archivos de entorno (no subir contraseñas)
+# =========================================
+.env
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+
+# =========================================
+# 🔹 Dependencias y builds
+# =========================================
+# Solo ignoramos node_modules y dist, no las carpetas del proyecto
+**/node_modules/
+**/dist/
+**/.vite/
+**/.cache/
+**/build/
+**/coverage/
+**/*.tsbuildinfo
+
+# =========================================
+# 🔹 Base de datos y volúmenes
+# =========================================
+*.sql
+*.dump
+chame_mysql_data/
+mysql_data/
+volumes/
+data/
+
+# =========================================
+# 🔹 Docker
+# =========================================
+.dockerignore
+**/Dockerfile~
+**/docker-compose.override.yml
+**/docker-compose.local.yml
+
+# =========================================
+# 🔹 Archivos del sistema / IDE
+# =========================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*.bak
+*.tmp
+*.old
+
+# =========================================
+# 🔹 Git
+# =========================================
+*.orig
+*.rej
